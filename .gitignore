@@ -8,6 +8,7 @@ node_modules/
 dist/
 web-build/
 expo-env.d.ts
+.env
 
 # Native
 *.orig.*
@@ -16,6 +17,7 @@ expo-env.d.ts
 *.p12
 *.key
 *.mobileprovision
+
 
 # Metro
 .metro-health-check*
