@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { View, TextInput, Text, ScrollView, StyleSheet } from "react-native";
+import { View, TextInput, Text, ScrollView, StyleSheet, ActivityIndicator } from "react-native";
 import { useDebounce } from "use-debounce";
 
 export default function GrammarCheckScreen() {
   const [text, setText] = useState("");
   const [corrections, setCorrections] = useState([]);
   const [error, setError] = useState(null);
-  const [debouncedText] = useDebounce(text, 1000);
-
+  const [loading, setLoading] = useState(false);
+  const [debouncedText] = useDebounce(text, 200);
   useEffect(() => {
     if (debouncedText) {
       checkGrammar(debouncedText);
@@ -16,10 +16,10 @@ export default function GrammarCheckScreen() {
       setError(null);
     }
   }, [debouncedText]);
-console.log(process.env.OPENAI_API_KEY,"OPENAI_API_KEY")
   const checkGrammar = async (inputText) => {
     try {
       setError(null);
+      setLoading(true);
       const response = await fetch("https://api.openai.com/v1/chat/completions", {
         method: "POST",
         headers: {
@@ -27,7 +27,7 @@ console.log(process.env.OPENAI_API_KEY,"OPENAI_API_KEY")
           "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`,
         },
         body: JSON.stringify({
-          model: "gpt-4",
+          model: "gpt-4o",
           messages: [
             {
               role: "user",
@@ -65,8 +65,6 @@ console.log(process.env.OPENAI_API_KEY,"OPENAI_API_KEY")
         throw new Error("No response received from the API");
       }
 
-      console.log("Raw response:", cleanResponse);
-
       if (cleanResponse.startsWith("```json")) {
         cleanResponse = cleanResponse.replace(/```json|```/g, "").trim();
       }
@@ -78,6 +76,7 @@ console.log(process.env.OPENAI_API_KEY,"OPENAI_API_KEY")
       }
 
       setCorrections(parsedData.corrections);
+      setLoading(false);
       setError(null);
     } catch (error) {
       console.error("Grammar check error:", error);
@@ -90,7 +89,12 @@ console.log(process.env.OPENAI_API_KEY,"OPENAI_API_KEY")
     <View style={styles.container}>
       <View style={styles.outputSection}>
         <Text style={styles.sectionTitle}>Output</Text>
-        <ScrollView style={styles.outputContent}>
+        {loading ? (
+          <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large"/>
+          </View>
+        ) : (
+          <ScrollView style={styles.outputContent}>
           {error ? (
             <View style={styles.errorContainer}>
               <Text style={styles.errorTitle}>Error</Text>
@@ -142,7 +146,8 @@ console.log(process.env.OPENAI_API_KEY,"OPENAI_API_KEY")
               Output text goes here, with incorrect words highlighted as shown.
             </Text>
           )}
-        </ScrollView>
+            </ScrollView>
+          )}
       </View>
 
       <View style={styles.inputSection}>
@@ -151,6 +156,7 @@ console.log(process.env.OPENAI_API_KEY,"OPENAI_API_KEY")
           multiline
           value={text}
           onChangeText={setText}
+          onPaste={setText}
           placeholder="User's plain text input goes here."
           placeholderTextColor="#999"
         />
@@ -295,5 +301,10 @@ const styles = StyleSheet.create({
     color: '#666',
     fontSize: 14,
     lineHeight: 20,
+  },
+  loadingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });
