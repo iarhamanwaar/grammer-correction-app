@@ -4,6 +4,7 @@ import { getItem, setItem } from '../utiles/constants';
 const AuthContext = createContext({
   accessToken: null,
   isLoading: true,
+  isAuthenticated: false,
   login: async (token) => {},
   logout: async () => {},
 });
@@ -11,6 +12,7 @@ const AuthContext = createContext({
 export const AuthProvider = ({ children }) => {
   const [accessToken, setAccessToken] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
     // Check for stored token when app loads
@@ -22,6 +24,7 @@ export const AuthProvider = ({ children }) => {
       const token = getItem('accessToken');
       if (token) {
         setAccessToken(token);
+        setIsAuthenticated(true);
       }
     } catch (error) {
       console.error('Error loading token:', error);
@@ -34,6 +37,7 @@ export const AuthProvider = ({ children }) => {
     try {
       setItem('accessToken', token);
       setAccessToken(token);
+      setIsAuthenticated(true);
     } catch (error) {
       console.error('Error storing token:', error);
       throw error;
@@ -44,6 +48,7 @@ export const AuthProvider = ({ children }) => {
     try {
       setItem('accessToken', '');
       setAccessToken(null);
+      setIsAuthenticated(false);
     } catch (error) {
       console.error('Error removing token:', error);
       throw error;
@@ -55,6 +60,7 @@ export const AuthProvider = ({ children }) => {
       value={{
         accessToken,
         isLoading,
+        isAuthenticated,
         login,
         logout,
       }}

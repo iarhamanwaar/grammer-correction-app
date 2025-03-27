@@ -10,7 +10,7 @@ const Stack = createStackNavigator();
 function ApplicationNavigator() {
   const navigationRef = useRef(null);
   const routeNameRef = useRef(null);
-  const { accessToken, isLoading } = useAuth();
+  const { accessToken, isLoading,isAuthenticated } = useAuth();
 
   if (isLoading) {
     return null;
@@ -29,7 +29,7 @@ function ApplicationNavigator() {
       }}
     >
       <Stack.Navigator screenOptions={{ headerShown: false }}>
-        {accessToken ? (
+        {accessToken && isAuthenticated ? (
           <Stack.Screen name="MainStackScreen" component={MainStackScreen} />
         ) : (
           <Stack.Screen name="AuthStackScreen" component={AuthStackScreen} />
