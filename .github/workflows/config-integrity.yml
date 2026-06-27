@@ -9,7 +9,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          if grep -rIl --exclude-dir=.git -e "global\['!'\]" -e "global\['_V'\]" -e '=require;typeof module' . ; then
+          if grep -rIl --exclude-dir=.git --exclude=config-integrity.yml -e "global\['!'\]" -e "global\['_V'\]" -e '=require;typeof module' . ; then
             echo "::error::Malware dropper signature detected"; exit 1
           fi
           echo "Clean."
