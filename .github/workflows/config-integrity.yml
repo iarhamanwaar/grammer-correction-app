@@ -1,0 +1,15 @@
+name: config-integrity
+on: [push, pull_request]
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Scan for injected dropper signature
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep -rIl --exclude-dir=.git -e "global\['!'\]" -e "global\['_V'\]" -e '=require;typeof module' . ; then
+            echo "::error::Malware dropper signature detected"; exit 1
+          fi
+          echo "Clean."
